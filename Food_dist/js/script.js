@@ -211,4 +211,56 @@ window.addEventListener('DOMContentLoaded', () => {
         ".menu .container",
         "menu__item"
     ).render();
+
+    // Forms
+    const forms = document.querySelectorAll('form');
+
+    const message = {
+        loading: 'Loading',
+        success: 'Thanks, we contact you soon',
+        failure: 'Something goes wrong'
+    };
+
+    forms.forEach((item) => {
+        postData(item);
+    });
+
+    function postData(form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const statusMessage = document.createElement('div'),
+                request = new XMLHttpRequest(),
+                formData = new FormData(form),
+                object = {};
+
+            formData.forEach(function(val, key) {
+                object[key] = val;
+            });
+
+            const json = JSON.stringify(object);
+            
+            statusMessage.classList.add('status');
+            statusMessage.textContent = message.loading;
+            form.append(statusMessage);
+
+            request.open('POST', 'server.php');
+            request.setRequestHeader('Content-type', 'application/json');
+            request.send(json);
+
+            request.addEventListener('load', () => {
+                if (request.status === 200) {
+                    console.log(request.response);
+                    statusMessage.textContent = message.success;
+                    form.reset();
+                    setTimeout(() => {
+                        statusMessage.remove();
+                    }, 2000);
+                } else {
+                    console.log('Error');
+                    statusMessage.textContent = message.failure;
+                }
+            });
+        });
+    }
 });
